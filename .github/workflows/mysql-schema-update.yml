@@ -18,7 +18,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get install mysql-client
 
       - name: Dump MySQL Schema
-        run: mysqldump -h ${{ secrets.DB_HOST }} -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASS }} --routines --complete-insert --quote-names spcdb > spcdb_full_backup.sql
+        run: mysqldump -h ${{ secrets.DB_HOST }} -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASS }} --routines --no-data spcdb > spcdb_schema.sql
+
+      - name: Check for Changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"; exit 0;
+          fi
 
       - name: Commit Changes
         run: |
