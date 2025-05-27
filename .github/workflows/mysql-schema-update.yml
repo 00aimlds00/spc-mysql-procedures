@@ -1,0 +1,26 @@
+name: MySQL Schema Auto-Update
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '30 12 * * *'  # Runs at 6 PM IST (which is 12:30 UTC)
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Dump MySQL Schema
+        run: mysqldump -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASS }} --routines --no-data spcdb > spcdb_schema.sql
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add spcdb_schema.sql
+          git commit -m "Auto-update MySQL schema from spcdb"
+          git push origin main
